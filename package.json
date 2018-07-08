@@ -1,0 +1,30 @@
+{
+  "name": "output_user_apply",
+  "version": "1.0.0",
+  "description": "output user_apply table data",
+  "main": "index.js",
+  "standard": {
+    "globals": [
+      "__localConnPool",
+      "__remoteConnPool",
+      "__localQuery",
+      "__remoteQuery"
+    ]
+  },
+  "scripts": {
+    "test": "node ./test/mysql.js"
+  },
+  "keywords": [
+    "output",
+    "excel",
+    "user_apply"
+  ],
+  "author": "yanqi",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.16.0",
+    "fecha": "^2.3.3",
+    "node-xlsx": "^0.12.1",
+    "promise-mysql": "^3.3.1"
+  }
+}

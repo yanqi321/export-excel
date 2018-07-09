@@ -17,6 +17,7 @@ let queryData = async (sTime, eTime) => {
     endTime = Math.floor(endTime / 1000)
     let values = [query, startTime, endTime]
     let result = await __remoteQuery(sql, values)
+    console.info(result.length)
     if (result) {
       const emailCheck = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
       let correctData = [query]
@@ -35,7 +36,7 @@ let queryData = async (sTime, eTime) => {
       writeXls(correctData, 'correctData')
       writeXls(illegalData, 'illegalData')
     }
-    process.exit(1)
+    process.exit(0)
   } catch (err) {
     console.log(err)
     process.exit(1)

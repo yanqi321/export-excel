@@ -6,11 +6,11 @@ global.__remoteConnPool = require('./util/mysql').remoteConnPool
 // global.__localQuery = require('./util/mysql').localQuery
 global.__remoteQuery = require('./util/mysql').remoteQuery
 
-let queryData = async (sTime, eTime) => {
+let queryData = async (sTime = '2018-07-01', eTime = '2018-08-01') => {
   try {
     const query = ['name', 'email', 'whatsapp', 'facebook', 'instagram', 'appname', 'add_time']
     let sql = 'select ?? from user_apply where add_time>= ? and add_time< ?'
-    const currentTimeZone = datetime.getTimezone()
+    const currentTimeZone = 0 // utc 时区
     let startTime = datetime.convertTimezone(new Date(sTime).getTime(), currentTimeZone, '5.5')
     startTime = Math.floor(startTime / 1000)
     let endTime = datetime.convertTimezone(new Date(eTime).getTime(), currentTimeZone, '5.5')

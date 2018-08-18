@@ -66,3 +66,6 @@ config/log4js.js
 config/redis.js
 config/mysql.js
 
+# export excel file
+*.xlsx
+

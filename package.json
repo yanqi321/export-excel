@@ -9,7 +9,7 @@
       "__remoteConnPool",
       "__localQuery",
       "__remoteQuery",
-      "__wemediaConnPoll",
+      "__wemediaConnPool",
       "__wemediaQuery"
     ]
   },

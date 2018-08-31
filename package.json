@@ -8,7 +8,9 @@
       "__localConnPool",
       "__remoteConnPool",
       "__localQuery",
-      "__remoteQuery"
+      "__remoteQuery",
+      "__wemediaConnPoll",
+      "__wemediaQuery"
     ]
   },
   "scripts": {

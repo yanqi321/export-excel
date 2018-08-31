@@ -1,10 +1,6 @@
 const fs = require('fs')
 const xlsx = require('node-xlsx')
-const datetime = require('./util/datetime')
-// global.__localConnPool = require('./util/mysql').localConnPool
-global.__remoteConnPool = require('./util/mysql').remoteConnPool
-// global.__localQuery = require('./util/mysql').localQuery
-global.__remoteQuery = require('./util/mysql').remoteQuery
+const datetime = require('../util/datetime')
 
 let queryData = async (sTime = '2018-07-01', eTime = '2018-08-01') => {
   try {

@@ -9,6 +9,14 @@ let mysqlTool = {
     database: config.local.database,
     charset: config.local.charset
   }),
+  wemediaConnPool: mysql.createPool({
+    connectionLimit: config.wemedia.limitSize,
+    host: config.wemedia.host,
+    user: config.wemedia.username,
+    password: config.wemedia.password,
+    database: config.wemedia.database,
+    charset: config.wemedia.charset
+  }),
   remoteConnPool: mysql.createPool({
     connectionLimit: config.remote.limitSize,
     host: config.remote.host,
@@ -21,6 +29,12 @@ let mysqlTool = {
     let connection = await __localConnPool.getConnection()
     let results = await connection.query(sql, values)
     __localConnPool.releaseConnection(connection)
+    return results
+  },
+  wemediaQuery: async (sql, values) => {
+    let connection = await __wemediaConnPool.getConnection()
+    let results = await connection.query(sql, values)
+    __wemediaConnPool.releaseConnection(connection)
     return results
   },
   remoteQuery: async (sql, values) => {

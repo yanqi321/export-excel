@@ -10,14 +10,15 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-01') => {
     let endTime = datetime.convertTimezone(new Date(eTime).getTime(), currentTimeZone, '5.5')
     endTime = new Date(endTime)
     let values = [startTime, endTime] */
-    const query = `select uuid,wemedia_name,phone,email,user.add_time  from user where user.source = 10`
+    const query = `select uuid,wemedia_name,phone,email,lang,category_id as category,user.add_time from user where user.source = 10`
     let result = await __wemediaQuery(query)
     __ilogger.info(`count: ${result.length}`)
     if (result) {
       let queryData = [
-        ['Wemedia Name', 'Phone', 'Email', 'Registration Time', 'Last Post Time',
-          'Articles Posted', 'Articles Passed', 'Videos Posted', 'Video Passed',
-          'Total Viewa', 'Total Revenues', 'Active Days'
+        ['Wemedia Name', 'Phone', 'Email', 'Language', 'Category', 'Grade', 'Advanced/Primary',
+          'Promotion time', 'Registration Time', 'Last Post Time', 'Total View', 'Total Revenues', 'Active Days',
+          'Articles Posted', 'Articles Passed', 'Articles Rec', 'Article View',
+          'Videos Posted', 'Video Passed', 'Video Rec', 'Video View'
         ]
       ]
       for (let i = 0; i < result.length; i++) {
@@ -30,12 +31,31 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-01') => {
         }
         rowData.post_time = lpost.data
 
-        let tview = await getTotalView(uid)
+        let lgrade = await lastGrade(uid)
+        if (!lgrade.succ) {
+          console.log('get last grade error')
+          return
+        }
+        rowData.grade = lgrade.data.grade
+        rowData.stage = lgrade.data.stage
+
+        let pt = await Promotion(uid)
+        if (!pt.succ) {
+          console.log('get promotion time error')
+          return
+        }
+        rowData.pt = pt.data
+
+        let tview = await getRV(uid)
         if (!tview.succ) {
           console.log('get total view error')
           return
         }
-        rowData.view_c_t = tview.data
+        rowData.totalVc = tview.data.totalView
+        rowData.articleVc = tview.data.articleVc
+        rowData.articleRc = tview.data.articleRc
+        rowData.videoVc = tview.data.videoVc
+        rowData.videoRc = tview.data.videoRc
 
         let revenues = await getTotalRevenues(uid)
         if (!revenues.succ) {
@@ -61,9 +81,11 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-01') => {
         rowData.videoCount = postData.data.videoCount
         rowData.videoPassed = postData.data.approveVideo
         queryData.push([
-          rowData.wemedia_name, rowData.phone, rowData.email, datetime.formatDate(rowData.add_time), datetime.formatDate(rowData.post_time),
-          rowData.articlePost, rowData.articlePassed, rowData.videoCount, rowData.videoPassed,
-          rowData.view_c_t, rowData.TotalRevenues, rowData.activeDay
+          rowData.wemedia_name, rowData.phone, rowData.email, rowData.lang, rowData.category, rowData.grade, rowData.stage,
+          datetime.formatDate(rowData.pt), datetime.formatDate(rowData.add_time), datetime.formatDate(rowData.post_time),
+          rowData.totalVc, rowData.TotalRevenues, rowData.activeDay,
+          rowData.articlePost, rowData.articlePassed, rowData.articleVc, rowData.articleRc,
+          rowData.videoCount, rowData.videoPassed, rowData.videoVc, rowData.videoRc
         ])
         if (i % 10 === 0) { // 每 10 条 停 2秒钟
           __ilogger.info(`index: ${i}`)
@@ -81,6 +103,56 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-01') => {
   } catch (err) {
     console.log(err)
     process.exit(1)
+  }
+}
+let lastGrade = async (uid) => {
+  let sql = 'select grade,stage from grade where id = (select max(id) id from grade where author_id = ?)'
+  try {
+    const result = await __wemediaQuery(sql, [uid])
+    if (result.length !== 1) {
+      return {
+        succ: true,
+        data: {
+          grade: 0,
+          stage: 0
+        }
+      }
+    }
+    return {
+      succ: true,
+      data: {
+        grade: result[0].grade,
+        stage: result[0].stage
+      }
+    }
+  } catch (error) {
+    __ilogger(`get post err${error.message}`)
+    return {
+      succ: false,
+      mess: error.message
+    }
+  }
+}
+let Promotion = async (uid) => {
+  let sql = 'select min(add_time) pt from grade where stage = 1 and level = 1 and author_id = ?'
+  try {
+    const result = await __wemediaQuery(sql, [uid])
+    if (result.length !== 1) {
+      return {
+        succ: false,
+        mess: 'no data'
+      }
+    }
+    return {
+      succ: true,
+      data: result[0].pt
+    }
+  } catch (error) {
+    __ilogger(`get post err${error.message}`)
+    return {
+      succ: false,
+      mess: error.message
+    }
   }
 }
 let getLastpost = async (uid) => {
@@ -105,19 +177,42 @@ let getLastpost = async (uid) => {
     }
   }
 }
-let getTotalView = async (uid) => {
-  let sql = 'select sum(view_count) view_c_t from article_log where author_id = ?' // FIXME
+let getRV = async (uid) => {
+  let sql = `select sum(view_count) vc,sum(rec_count) rc,article_log.atype from article_log  
+  left join article on article.uuid = article_log.article_id 
+  where article_log.author_id = ? and status = 2 group by article_log.atype`
   try {
+    let articleVc = 0
+    let articleRc = 0
+    let videoVc = 0
+    let videoRc = 0
+    let totalView = 0
     const result = await __wemediaQuery(sql, [uid])
     if (result.length !== 1) {
       return {
-        succ: false,
-        mess: 'no data'
+        succ: true,
+        data: {
+          articleVc, articleRc, videoVc, videoRc, totalView
+        }
+      }
+    }
+    for (let i = 0; i < result.length; i++) {
+      totalView += result[i].vc
+      if (result[i].atype === 0) {
+        articleVc += result[i].vc
+        articleRc += result[i].rc
+        continue
+      }
+      if (result[i].atype === 9) {
+        videoVc += result[i].vc
+        videoRc += result[i].rc
       }
     }
     return {
       succ: true,
-      data: result[0].view_c_t
+      data: {
+        articleVc, articleRc, videoVc, videoRc, totalView
+      }
     }
   } catch (error) {
     __ilogger(`getTotalView err${error.message}`)
@@ -222,8 +317,9 @@ let getArticleData = async (uid) => {
 let writeXls = (data, tablename) => {
   const option = {
     '!cols': [
-      { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 15 },
-      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+      { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 15 }, { wch: 20 },
+      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
+      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
     ]
   }
   try {

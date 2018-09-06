@@ -5,7 +5,7 @@ global.__wemediaConnPool = require('./util/mysql').wemediaConnPool
 // global.__remoteQuery = require('./util/mysql').remoteQuery
 global.__wemediaQuery = require('./util/mysql').wemediaQuery
 
-const main = require('./src/export')
+const main = require('./src/export_full')
 
 const log4js = require('log4js')
 

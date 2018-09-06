@@ -15,6 +15,9 @@ let datetime = {
     return result
   },
   formatDate: (gmtTime) => {
+    if (!gmtTime) {
+      return ''
+    }
     gmtTime = new Date(gmtTime)
     return fecha.format(gmtTime, 'YYYY-MM-DD HH:mm:ss')
   }

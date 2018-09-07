@@ -10,7 +10,7 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-01') => {
     let endTime = datetime.convertTimezone(new Date(eTime).getTime(), currentTimeZone, '5.5')
     endTime = new Date(endTime)
     let values = [startTime, endTime] */
-    const query = `select uuid,wemedia_name,phone,email,lang,category_id as category,user.add_time from user where user.source = 10`
+    const query = `select uuid,wemedia_name,phone,email,lang,category_id as category,user.add_time from user where user.source = 10 and uuid ='24e18560a35411e8bf275fa6cea748b5'`
     let result = await __wemediaQuery(query)
     __ilogger.info(`count: ${result.length}`)
     if (result) {
@@ -126,7 +126,7 @@ let lastGrade = async (uid) => {
       }
     }
   } catch (error) {
-    __ilogger(`get post err${error.message}`)
+    __ilogger.error(`get post err${error.message}`)
     return {
       succ: false,
       mess: error.message
@@ -148,7 +148,7 @@ let Promotion = async (uid) => {
       data: result[0].pt
     }
   } catch (error) {
-    __ilogger(`get post err${error.message}`)
+    __ilogger.error(`get post err${error.message}`)
     return {
       succ: false,
       mess: error.message
@@ -170,7 +170,7 @@ let getLastpost = async (uid) => {
       data: result[0].post_time
     }
   } catch (error) {
-    __ilogger(`get post err${error.message}`)
+    __ilogger.error(`get post err${error.message}`)
     return {
       succ: false,
       mess: error.message
@@ -178,16 +178,15 @@ let getLastpost = async (uid) => {
   }
 }
 let getRV = async (uid) => {
-  let sql = `select sum(view_count) vc,sum(rec_count) rc,article_log.atype from article_log  
-  left join article on article.uuid = article_log.article_id 
-  where article_log.author_id = ? and status = 2 group by article_log.atype`
+  let sql = `select sum(view_count_real) vc,sum(rec_count) rc,log_article.atype from log_article  
+  where log_article.author_id = ? group by log_article.atype`
   try {
     let articleVc = 0
     let articleRc = 0
     let videoVc = 0
     let videoRc = 0
     let totalView = 0
-    const result = await __wemediaQuery(sql, [uid])
+    const result = await __logQuery(sql, [uid])
     if (result.length !== 1) {
       return {
         succ: true,
@@ -215,7 +214,7 @@ let getRV = async (uid) => {
       }
     }
   } catch (error) {
-    __ilogger(`getTotalView err${error.message}`)
+    __ilogger.error(`getTotalView err${error.message}`)
     return {
       succ: false,
       mess: error.message
@@ -237,7 +236,7 @@ let getTotalRevenues = async (uid) => {
       data: (result[0].sum / 100).toFixed(2)
     }
   } catch (error) {
-    __ilogger(`getTotalRevenueserr${error.message}`)
+    __ilogger.error(`getTotalRevenueserr${error.message}`)
     return {
       succ: false,
       mess: error.message
@@ -260,7 +259,7 @@ let getTotalAct = async (uid) => {
       data: result.length
     }
   } catch (error) {
-    __ilogger(`getTotalAct${error.message}`)
+    __ilogger.info(`getTotalAct${error.message}`)
     return {
       succ: false,
       mess: error.message

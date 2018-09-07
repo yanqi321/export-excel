@@ -20,22 +20,22 @@ let testLocalConnection = () => {
   })
 }
 
-let testRemoteConnection = () => {
+let testLogConnection = () => {
   let connection = mysql.createConnection({
-    host: mysqlConfig.remote.host,
-    port: mysqlConfig.remote.port,
-    user: mysqlConfig.remote.username,
-    password: mysqlConfig.remote.password
+    host: mysqlConfig.log.host,
+    port: mysqlConfig.log.port,
+    user: mysqlConfig.log.username,
+    password: mysqlConfig.log.password
   })
   connection.connect((error) => {
     if (error) {
-      console.error('Remote MySQL Connection', error.toString())
+      console.error('log MySQL Connection', error.toString())
     } else {
-      console.info('Remote MySQL Connection Success.')
+      console.info('log MySQL Connection Success.')
     }
   })
   connection.end(() => {
-    console.warn('Remote MySQL Disconnect.')
+    console.warn('log MySQL Disconnect.')
   })
 }
 
@@ -59,5 +59,5 @@ let testWemediaConnection = () => {
 }
 
 testLocalConnection()
-testRemoteConnection()
+testLogConnection()
 testWemediaConnection()

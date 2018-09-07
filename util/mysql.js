@@ -17,13 +17,13 @@ let mysqlTool = {
     database: config.wemedia.database,
     charset: config.wemedia.charset
   }),
-  remoteConnPool: mysql.createPool({
-    connectionLimit: config.remote.limitSize,
-    host: config.remote.host,
-    user: config.remote.username,
-    password: config.remote.password,
-    database: config.remote.database,
-    charset: config.remote.charset
+  logConnPool: mysql.createPool({
+    connectionLimit: config.log.limitSize,
+    host: config.log.host,
+    user: config.log.username,
+    password: config.log.password,
+    database: config.log.database,
+    charset: config.log.charset
   }),
   localQuery: async (sql, values) => {
     let connection = await __localConnPool.getConnection()
@@ -37,10 +37,10 @@ let mysqlTool = {
     __wemediaConnPool.releaseConnection(connection)
     return results
   },
-  remoteQuery: async (sql, values) => {
-    let connection = await __remoteConnPool.getConnection()
+  logQuery: async (sql, values) => {
+    let connection = await __logConnPool.getConnection()
     let results = await connection.query(sql, values)
-    __remoteConnPool.releaseConnection(connection)
+    __logConnPool.releaseConnection(connection)
     return results
   }
 }

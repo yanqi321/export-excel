@@ -6,12 +6,12 @@
   "standard": {
     "globals": [
       "__localConnPool",
-      "__remoteConnPool",
       "__localQuery",
-      "__remoteQuery",
       "__wemediaConnPool",
       "__wemediaQuery",
-      "__ilogger"
+      "__ilogger",
+      "__logConnPool",
+      "__logQuery"
     ]
   },
   "scripts": {

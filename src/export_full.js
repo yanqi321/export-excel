@@ -81,7 +81,7 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-12') => {
         rowData.videoCount = postData.data.videoCount
         rowData.videoPassed = postData.data.approveVideo
         queryData.push([
-          rowData.wemedia_name, rowData.phone, rowData.email, rowData.lang, rowData.category, rowData.grade, rowData.stage,
+          rowData.wemedia_name, rowData.phone, rowData.email, rowData.lang, rowData.category, rowData.status, rowData.grade, rowData.stage,
           datetime.formatDate(rowData.pt), datetime.formatDate(rowData.add_time), datetime.formatDate(rowData.post_time),
           rowData.totalVc, rowData.TotalRevenues, rowData.activeDay,
           rowData.articlePost, rowData.articlePassed, rowData.articleVc, rowData.articleRc,
@@ -316,7 +316,7 @@ let getArticleData = async (uid) => {
 let writeXls = (data, tablename) => {
   const option = {
     '!cols': [
-      { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 15 }, { wch: 20 },
+      { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 15 }, { wch: 20 }, { wch: 15 },
       { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
       { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
     ]

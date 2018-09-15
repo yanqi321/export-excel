@@ -134,7 +134,7 @@ let lastGrade = async (uid) => {
   }
 }
 let Promotion = async (uid) => {
-  let sql = 'select min(add_time) pt from grade where stage = 1 and level = 1 and author_id = ?'
+  let sql = 'select min(update_time) pt from grade where stage = 1 and author_id = ?'
   try {
     const result = await __wemediaQuery(sql, [uid])
     if (result.length !== 1) {

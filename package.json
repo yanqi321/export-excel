@@ -9,6 +9,8 @@
       "__localQuery",
       "__wemediaConnPool",
       "__wemediaQuery",
+      "__remoteConnPool",
+      "__remoteQuery",
       "__ilogger",
       "__logConnPool",
       "__logQuery"

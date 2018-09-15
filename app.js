@@ -1,3 +1,6 @@
+/*
+说明：用户分析程序导出 对应 export_full.js
+*/
 global.__logConnPool = require('./util/mysql').logConnPool
 global.__wemediaConnPool = require('./util/mysql').wemediaConnPool
 global.__logQuery = require('./util/mysql').logQuery

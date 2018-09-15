@@ -2,7 +2,7 @@ const fs = require('fs')
 const xlsx = require('node-xlsx')
 const datetime = require('../util/datetime')
 
-let queryData = async (sTime = '2018-07-01', eTime = '2018-08-01') => {
+let queryData = async (sTime = '2018-08-01', eTime = '2018-09-01') => {
   try {
     const query = ['name', 'email', 'whatsapp', 'facebook', 'instagram', 'appname', 'add_time']
     let sql = 'select ?? from user_apply where add_time>= ? and add_time< ?'

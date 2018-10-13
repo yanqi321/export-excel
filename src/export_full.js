@@ -2,7 +2,7 @@ const fs = require('fs')
 const xlsx = require('node-xlsx')
 const datetime = require('../util/datetime')
 
-let queryData = async (sTime = '2018-07-01', eTime = '2018-09-12') => {
+let queryData = async (sTime = '2018-07-01', eTime = '2018-10-12') => {
   try {
     const currentTimeZone = 0 // utc 时区
     // let startTime = datetime.convertTimezone(new Date(sTime).getTime(), currentTimeZone, '5.5')
@@ -16,7 +16,7 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-12') => {
     if (result) {
       let queryData = [
         ['Wemedia Name', 'Phone', 'Email', 'Language', 'Category', 'Status', 'Grade', 'Advanced/Primary',
-          'Promotion time', 'Registration Time', 'Last Post Time', 'Total View', 'Total Revenues', 'Active Days',
+          'Promotion time', 'Registration Time', 'First Post Time', 'Last Post Time', 'Total View', 'Total Revenues', 'Active Days',
           'Articles Posted', 'Articles Passed', 'Articles Rec', 'Article View',
           'Videos Posted', 'Video Passed', 'Video Rec', 'Video View'
         ]
@@ -29,8 +29,8 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-12') => {
           console.log('get last Post error')
           return
         }
-        rowData.post_time = lpost.data
-
+        rowData.f_post_time = lpost.data.f_post_time
+        rowData.l_post_time = lpost.data.l_post_time
         let lgrade = await lastGrade(uid)
         if (!lgrade.succ) {
           console.log('get last grade error')
@@ -82,10 +82,10 @@ let queryData = async (sTime = '2018-07-01', eTime = '2018-09-12') => {
         rowData.videoPassed = postData.data.approveVideo
         queryData.push([
           rowData.wemedia_name, rowData.phone, rowData.email, rowData.lang, rowData.category, rowData.status, rowData.grade, rowData.stage,
-          datetime.formatDate(rowData.pt), datetime.formatDate(rowData.add_time), datetime.formatDate(rowData.post_time),
+          datetime.formatDate(rowData.pt), datetime.formatDate(rowData.add_time), datetime.formatDate(rowData.f_post_time), datetime.formatDate(rowData.l_post_time),
           rowData.totalVc, rowData.TotalRevenues, rowData.activeDay,
-          rowData.articlePost, rowData.articlePassed, rowData.articleVc, rowData.articleRc,
-          rowData.videoCount, rowData.videoPassed, rowData.videoVc, rowData.videoRc
+          rowData.articlePost, rowData.articlePassed, rowData.articleRc, rowData.articleVc,
+          rowData.videoCount, rowData.videoPassed, rowData.videoRc, rowData.videoVc
         ])
         if (i % 10 === 0) { // 每 10 条 停 2秒钟
           __ilogger.info(`index: ${i}`)
@@ -156,7 +156,7 @@ let Promotion = async (uid) => {
   }
 }
 let getLastpost = async (uid) => {
-  let sql = 'select max(add_time) as post_time from article where author_id = ?'
+  let sql = 'select max(add_time) as l_post_time,min(add_time) as f_post_time from article where author_id = ?'
   try {
     const result = await __wemediaQuery(sql, [uid])
     if (result.length !== 1) {
@@ -167,7 +167,7 @@ let getLastpost = async (uid) => {
     }
     return {
       succ: true,
-      data: result[0].post_time
+      data: result[0]
     }
   } catch (error) {
     __ilogger.error(`get post err${error.message}`)
@@ -202,7 +202,7 @@ let getRV = async (uid) => {
         articleRc += result[i].rc
         continue
       }
-      if (result[i].atype === 9) {
+      if ([6, 8, 9].includes(result[i].atype)) {
         videoVc += result[i].vc
         videoRc += result[i].rc
       }
@@ -245,7 +245,7 @@ let getTotalRevenues = async (uid) => {
 }
 
 let getTotalAct = async (uid) => {
-  let sql = `select DATE_FORMAT(add_time, "%Y-%m-%d") as date, count(*) as count from article where author_id = ? and status = 2 and atype = 0 group by date`
+  let sql = `select DATE_FORMAT(add_time, "%Y-%m-%d") as date, count(*) as count from article where author_id = ?  group by date`
   try {
     const result = await __wemediaQuery(sql, [uid])
     if (!result) {
@@ -289,7 +289,7 @@ let getArticleData = async (uid) => {
         }
         continue
       }
-      if (result[i].atype === 9) {
+      if ([6, 8, 9].includes(result[i].atype)) {
         videoCount += result[i].count
         if (result[i].status === 2) {
           approveVideo += result[i].count
@@ -317,7 +317,7 @@ let writeXls = (data, tablename) => {
   const option = {
     '!cols': [
       { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 18 }, { wch: 15 }, { wch: 20 }, { wch: 15 },
-      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
+      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 15 },
       { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
     ]
   }

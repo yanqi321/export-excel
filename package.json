@@ -28,6 +28,7 @@
   "license": "ISC",
   "dependencies": {
     "commander": "^2.16.0",
+    "elasticsearch": "^15.2.0",
     "fecha": "^2.3.3",
     "node-xlsx": "^0.12.1",
     "promise-mysql": "^3.3.1"

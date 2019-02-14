@@ -7,12 +7,14 @@ let datetime = {
     return timeZone
   },
   convertTimezone: (utcTime, currentTimezone, targetTimezone) => {
-    // console.log('utcTime:', utcTime)
-    const offsetTime = (currentTimezone - targetTimezone) * 60 * 60 * 1000
+    if (!utcTime) {
+      return ''
+    }
+    const offsetTime = (targetTimezone - currentTimezone) * 60 * 60 * 1000
     // console.log('offsetTime:', offsetTime)
-    const result = utcTime + offsetTime
+    const result = new Date(utcTime.getTime() + offsetTime)
     // console.log('result:', result)
-    return result
+    return fecha.format(result, 'YYYY-MM-DD HH:mm:ss')
   },
   formatDate: (gmtTime) => {
     if (!gmtTime) {

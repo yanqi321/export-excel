@@ -1,12 +1,12 @@
 /*
 说明：用户分析程序导出 对应 export_full.js
 */
-global.__logConnPool = require('./util/mysql').logConnPool
+// global.__logConnPool = require('./util/mysql').logConnPool
 global.__wemediaConnPool = require('./util/mysql').wemediaConnPool
-global.__logQuery = require('./util/mysql').logQuery
+// global.__logQuery = require('./util/mysql').logQuery
 global.__wemediaQuery = require('./util/mysql').wemediaQuery
 
-const main = require('./src/export_full')
+const main = require('./src/exportUser')
 
 const log4js = require('log4js')
 

@@ -43,9 +43,9 @@ let queryData = async () => {
     let result = await __wemediaQuery(sql)
     console.info(result.length)
     if (result) {
-      let queryData = ['wemedia_name', 'real_name', 'lang', 'phone', 'email', 'stage', 'description',
+      let queryData = [['wemedia_name', 'real_name', 'lang', 'phone', 'email', 'stage', 'description',
         'register_time', 'last_post_time', 'promotion_time', 'active_day', 'Number of Articles', 'Number of Videos', 'location'
-      ]
+      ]]
       for (let i = 0; i < result.length; i++) {
         let rowData = result[i]
         rowData.add_time = datetime.convertTimezone(rowData.add_time, 8, 5.5)

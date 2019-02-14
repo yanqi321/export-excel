@@ -98,6 +98,15 @@ let queryData = async () => {
           rowData.description, rowData.add_time, rowData.last_post_time, rowData.promotion_time,
           rowData.active_day, rowData.articleCount, rowData.videoCount, rowData.location
         ])
+        if (i % 100 === 0) { // 每 100 条 停 1秒钟
+          __ilogger.info(`index: ${i}`)
+          await new Promise(
+            (resolve) => {
+              setTimeout(() => {
+                resolve('over')
+              }, 1000)
+            })
+        }
       }
       // const testData = [[1, 2, 3], [true, false, null, 'sheetjs'], ['foo', 'bar', new Date('2014-02-19T14:30Z'), '0.3'], ['baz', null, 'qux']]
       // writeXls(testData)

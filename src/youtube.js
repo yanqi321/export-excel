@@ -13,7 +13,7 @@ let queryData = async () => {
     }
     const usql = `select user.uuid,wemedia_name,phone,email,lang,youtube,category_id as category,user.add_time,
     city,state,grade,stage,level,promotion_time as pt,last_post_time,active_day from user inner join user_info on 
-    user_info.uuid =user.uuid and youtube is not null and youtube !='' where user.source = 10 and status=1 limit 3`
+    user_info.uuid =user.uuid and youtube is not null and youtube !='' where user.source = 10 and status=1`
     let result = await __wemediaQuery(usql)
     __ilogger.info(`count: ${result.length}`)
     if (result) {
@@ -189,7 +189,8 @@ let getRecView = async (uid) => {
       'query': {
         'bool': {
           'must': [
-            { 'terms': { 'author_id': [uid] } }
+            { 'terms': { 'author_id': [uid] } },
+            { 'term': { 'user_source': 10 } }
           ]
         }
       },
@@ -216,7 +217,6 @@ let getRecView = async (uid) => {
     }
 
     let result = await esquery.logResult(libJsonTemplate)
-    if (!result.length) return { data: [], succ: false, code: 404 }
     for (let i = 0; i < result.length; i++) {
       totalView += result[i].view_count_sum.value
       if (result[i].key === 0) {

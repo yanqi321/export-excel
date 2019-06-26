@@ -3,9 +3,9 @@ const xlsx = require('node-xlsx')
 const datetime = require('../util/datetime')
 const es = require('../util/es')
 
-let queryData = async (sTime = '2018-04-01', eTime = '2018-05-01') => {
+let queryData = async (sTime = '2019-04-01', eTime = '2019-05-01') => {
   try {
-    let sql = `SELECT oc.uuid,lang from operation_record_cms oc inner join topic on topic.uuid=oc.uuid where op_type=2 and op_time>? and op_time<? and newValue!=0`
+    let sql = `SELECT oc.uuid,lang from operation_record_cms oc inner join topic on topic.uuid=oc.uuid where op_type=2 and op_time>=? and op_time<? and newValue!=0`
     let startTime = datetime.convertTimezone(new Date(sTime), 5.5, 0)
     let endTime = datetime.convertTimezone(new Date(eTime), 5.5, 0)
     let values = [startTime, endTime]
@@ -27,7 +27,29 @@ let queryData = async (sTime = '2018-04-01', eTime = '2018-05-01') => {
       for (let key in langArr) {
         let uuids = langArr[key]
         let view = await esQuery(uuids, [startTime.getTime(), endTime.getTime() + 24 * 60 * 60 * 1000])
-        tableData.push([sTime, key, uuids.length, view])
+        let lang = Number(key)
+        if (lang === 0) {
+          lang = 'English'
+        } else if (lang === 1) {
+          lang = 'Hindi'
+        } else if (lang === 2) {
+          lang = 'Marathi'
+        } else if (lang === 3) {
+          lang = 'Tamil'
+        } else if (lang === 4) {
+          lang = 'Bengali'
+        } else if (lang === 5) {
+          lang = 'Telugu'
+        } else if (lang === 6) {
+          lang = 'Kannada'
+        } else if (lang === 7) {
+          lang = 'Gujarati'
+        } else if (lang === 8) {
+          lang = 'Punjabi'
+        } else if (lang === 10) {
+          lang = 'Malayalam'
+        }
+        tableData.push([sTime, lang, uuids.length, view])
       }
       writeXls(tableData, sTime)
     }
@@ -55,7 +77,7 @@ const esQuery = async (uuids, timeRange) => {
           },
           {
             'term': {
-              'ul_actType': 2000
+              'ul_actType': 1000
             }
           },
           {
@@ -72,6 +94,7 @@ const esQuery = async (uuids, timeRange) => {
       'size': 0
     }
     var result = await es.search(queryBody)
+    console.log(queryBody, result.hits)
     return result.hits.total
   } catch (error) {
     console.log(error.message)

@@ -1,7 +1,7 @@
 /*
 说明：用户分析程序导出 对应 export_full.js
 */
-global.__localConnPool = require('./util/mysql').__localConnPool
+global.__localConnPool = require('./util/mysql').localConnPool
 global.__localQuery = require('./util/mysql').localQuery
 
 const main = require('./src/main')

@@ -1,36 +1,35 @@
 const fs = require('fs')
 const xlsx = require('node-xlsx')
 const datetime = require('../util/datetime')
+const es = require('../util/es')
 
-let queryData = async (sTime = '2018-08-01', eTime = '2018-09-01') => {
+let queryData = async (sTime = '2018-04-01', eTime = '2018-05-01') => {
   try {
-    const query = ['name', 'email', 'whatsapp', 'facebook', 'instagram', 'appname', 'add_time']
-    let sql = 'select ?? from user_apply where add_time>= ? and add_time< ?'
-    const currentTimeZone = 0 // utc 时区
-    let startTime = datetime.convertTimezone(new Date(sTime).getTime(), currentTimeZone, '5.5')
-    startTime = Math.floor(startTime / 1000)
-    let endTime = datetime.convertTimezone(new Date(eTime).getTime(), currentTimeZone, '5.5')
-    endTime = Math.floor(endTime / 1000)
-    let values = [query, startTime, endTime]
-    let result = await __remoteQuery(sql, values)
+    let sql = `SELECT oc.uuid,lang from operation_record_cms oc inner join topic on topic.uuid=oc.uuid where op_type=2 and op_time>? and op_time<? and newValue!=0`
+    let startTime = datetime.convertTimezone(new Date(sTime), 5.5, 0)
+    let endTime = datetime.convertTimezone(new Date(eTime), 5.5, 0)
+    let values = [startTime, endTime]
+    let result = await __localQuery(sql, values)
     console.info(result.length)
     if (result) {
-      const emailCheck = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
-      let correctData = [query]
-      let illegalData = [query]
+      // 获取 view 数据
+      let langArr = {}
       for (let i = 0; i < result.length; i++) {
-        let rowData = result[i]
-        let addTime = datetime.formatDate(rowData.add_time * 1000)
-        if (emailCheck.test(rowData.email) && rowData.whatsapp.length === 10 && ['RozBuzz', 'RozBuzzMain', 'RozBuzzPro'].includes(rowData.appname)) {
-          correctData.push([rowData.name, rowData.email, rowData.whatsapp, rowData.facebook, rowData.instagram, rowData.appname, addTime])
+        let item = result[i]
+        if (langArr[item.lang]) {
+          langArr[item.lang].push(item.uuid)
         } else {
-          illegalData.push([rowData.name, rowData.email, rowData.whatsapp, rowData.facebook, rowData.instagram, rowData.appname, addTime])
+          langArr[item.lang] = [item.uuid]
         }
       }
-      // const testData = [[1, 2, 3], [true, false, null, 'sheetjs'], ['foo', 'bar', new Date('2014-02-19T14:30Z'), '0.3'], ['baz', null, 'qux']]
-      // writeXls(testData)
-      writeXls(correctData, 'correctData')
-      writeXls(illegalData, 'illegalData')
+
+      let tableData = ['Date', 'lang', 'count', 'view']
+      for (let key in langArr) {
+        let uuids = langArr[key]
+        let view = await esQuery(uuids, [startTime.getTime(), endTime.getTime() + 24 * 60 * 60 * 1000])
+        tableData.push([sTime, key, uuids.length, view])
+      }
+      writeXls(tableData, sTime)
     }
     process.exit(0)
   } catch (err) {
@@ -39,9 +38,48 @@ let queryData = async (sTime = '2018-08-01', eTime = '2018-09-01') => {
   }
 }
 
+const esQuery = async (uuids, timeRange) => {
+  try {
+    let queryBody = {
+      'query': {
+        'bool': {
+          'filter': [{
+            'terms': {
+              'ul_targetId': uuids
+            }
+          },
+          {
+            'term': {
+              'ul_strategyId': 606
+            }
+          },
+          {
+            'term': {
+              'ul_actType': 2000
+            }
+          },
+          {
+            'range': {
+              'ul_addTime': {
+                'lt': timeRange[1],
+                'gte': timeRange[0]
+              }
+            }
+          }
+          ]
+        }
+      },
+      'size': 0
+    }
+    var result = await es.search(queryBody)
+    return result.hits.total
+  } catch (error) {
+    console.log(error.message)
+  }
+}
 let writeXls = (data, tablename) => {
   const option = {
-    '!cols': [{ wch: 20 }, { wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 20 }]
+    '!cols': [{ wch: 20 }, { wch: 35 }, { wch: 15 }, { wch: 15 }]
   }
   try {
     var buffer = xlsx.build([
@@ -56,4 +94,5 @@ let writeXls = (data, tablename) => {
     process.exit(1)
   }
 }
+// esQuery(['e702347358c10e741e2ea0eb6a2cc9b0', '67b905f7b50ef887999be79280f9f710', '05d98973616589a14814ee7d7752f504', 'b0974ebdc5a47ae8bd600e40ac5a22b6'], [new Date('2019-04-01').getTime(), new Date('2019-07-01').getTime()])
 module.exports = queryData

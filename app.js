@@ -1,12 +1,10 @@
 /*
 说明：用户分析程序导出 对应 export_full.js
 */
-// global.__logConnPool = require('./util/mysql').logConnPool
-global.__wemediaConnPool = require('./util/mysql').wemediaConnPool
-// global.__logQuery = require('./util/mysql').logQuery
-global.__wemediaQuery = require('./util/mysql').wemediaQuery
+global.__localConnPool = require('./util/mysql').__localConnPool
+global.__localQuery = require('./util/mysql').localQuery
 
-const main = require('./src/youtube')
+const main = require('./src/main')
 
 const log4js = require('log4js')
 

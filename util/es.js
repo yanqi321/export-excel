@@ -1,19 +1,32 @@
 const elasticsearch = require('elasticsearch')
-var ES_CLIENT
+const hosts = ['rozloges1:19200']
+const apiVersion = '6.0'
+var logClient = new elasticsearch.Client({
+  hosts,
+  apiVersion,
+  requestTimeout: 600000
+})
 let esClient = {
-  esClient: (sql, values) => {
-    if (ES_CLIENT) {
-      return ES_CLIENT
+  search: async (body) => {
+    if (!logClient) {
+      logClient = new elasticsearch.Client({
+        hosts,
+        apiVersion,
+        requestTimeout: 600000
+      })
     }
-    const hosts = ['cccommon:19200']
-    const apiVersion = '5.6'
-    const client = new elasticsearch.Client({
-      hosts,
-      apiVersion,
-      requestTimeout: 600000
-    })
-    ES_CLIENT = client
-    return client
+    try {
+      const response = await logClient.search(
+        {
+          index: 'logstash-userlog*',
+          type: 'logs',
+          body: body
+        })
+      return response
+    } catch (error) {
+      console.log(error.message)
+      // __ilogger.error(`es error: ${error.message}`)
+    }
   }
 }
 module.exports = esClient

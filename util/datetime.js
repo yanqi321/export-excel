@@ -14,7 +14,7 @@ let datetime = {
     // console.log('offsetTime:', offsetTime)
     const result = new Date(utcTime.getTime() + offsetTime)
     // console.log('result:', result)
-    return fecha.format(result, 'YYYY-MM-DD HH:mm:ss')
+    return result
   },
   formatDate: (gmtTime) => {
     if (!gmtTime) {
